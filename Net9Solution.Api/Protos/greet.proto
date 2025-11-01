@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+option csharp_namespace = "Net9Solution.Api.Models";
+
+message ComplexData {
+    string string_value = 1;
+    int32 int32_value = 2;
+    bool bool_value = 3;
+    repeated string string_array = 4;
+    map<string, string> string_map = 5;
+    NestedData nested_data = 6;
+}
+
+message NestedData {
+    string nested_string_value = 1;
+    double nested_double_value = 2;
+}
