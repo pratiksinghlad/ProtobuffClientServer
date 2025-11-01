@@ -1,21 +1,20 @@
 using System.Runtime.CompilerServices;
-using Google.Protobuf.Collections;
-using Net9Solution.Api.Formatters;
 using Net9Solution.Api.Models;
 
 [assembly: InternalsVisibleTo("Net9Solution.Api.Tests")]
 
 var builder = WebApplication.CreateBuilder(args);
-builder.Services.AddMvcCore(options =>
-{
-    options.OutputFormatters.Add(new ProtobufOutputFormatter());
-});
+builder.Services
+    .AddEndpointsApiExplorer()
+    .AddControllers();
 
 var app = builder.Build();
 
-app.MapGet("/data", () =>
+app.UseRouting();
+
+app.MapGet("/data", (HttpContext context) =>
 {
-    return new ComplexData
+    var data = new ComplexData
     {
         StringValue = "Hello, World!",
         Int32Value = 42,
@@ -28,8 +27,25 @@ app.MapGet("/data", () =>
             NestedDoubleValue = 3.14
         }
     };
+
+    var accept = context.Request.Headers.Accept.ToString();
+    if (accept.Contains("application/x-protobuf"))
+    {
+        using var ms = new MemoryStream();
+        using var output = new Google.Protobuf.CodedOutputStream(ms);
+        data.WriteTo(output);
+        output.Flush();
+        var buffer = ms.ToArray();
+        return Results.File(buffer, "application/x-protobuf");
+    }
+
+    var json = System.Text.Json.JsonSerializer.Serialize(data, new System.Text.Json.JsonSerializerOptions
+    {
+        PropertyNamingPolicy = null
+    });
+    return Results.Text(json, "application/json");
 });
 
-app.Run();
+await app.RunAsync();
 
 public partial class Program { }

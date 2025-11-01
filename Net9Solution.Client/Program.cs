@@ -1,10 +1,5 @@
-using System;
-using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
-using System.Text.Json;
-using System.Threading.Tasks;
-using Google.Protobuf;
 using Microsoft.Extensions.DependencyInjection;
 using Net9Solution.Api.Models;
 
